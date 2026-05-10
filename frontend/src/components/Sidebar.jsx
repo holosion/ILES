@@ -10,6 +10,7 @@ import { NavLink } from "react-router-dom";
 import { courseInfo, workflowStates } from "../data/courseData";
 
 const links = [
+  // Sidebar links define the main pages in one place so navigation is easy to update.
   { to: "/", label: "Dashboard", icon: Home },
   { to: "/weeklyLogs", label: "Weekly Logs", icon: FileText },
   { to: "/Evaluations", label: "Evaluations", icon: ClipboardCheck },
@@ -19,6 +20,7 @@ const links = [
 
 function Sidebar() {
   return (
+    // Aside is used because this is supporting navigation beside the main page content.
     <aside className="sidebar">
       <div className="sidebar__header">
         <span className="sidebar__mark" aria-hidden="true">
@@ -32,6 +34,7 @@ function Sidebar() {
 
       <nav className="sidebar__nav" aria-label="Main navigation">
         {links.map(({ to, label, icon: Icon }) => (
+          // NavLink automatically tells us when the current URL matches this link.
           <NavLink
             className={({ isActive }) =>
               isActive ? "sidebar__link sidebar__link--active" : "sidebar__link"
@@ -45,6 +48,7 @@ function Sidebar() {
         ))}
       </nav>
 
+      {/* This mini guide helps users remember the correct weekly-log workflow order. */}
       <div className="sidebar__workflow">
         <span>Workflow states</span>
         {workflowStates.map((state) => (

@@ -8,16 +8,19 @@ import {
 } from "../data/courseData";
 
 function readStoredData(key, fallback) {
+  // Reports should reflect user-created data when it exists, otherwise use demo data.
   const savedData = localStorage.getItem(key);
   return savedData ? JSON.parse(savedData) : fallback;
 }
 
 function Reports() {
+  // Pull current prototype data from localStorage so reports update after form actions.
   const logs = readStoredData("iles-weekly-logs", initialLogs);
   const evaluations = readStoredData("iles-evaluations", initialEvaluations);
   const approvedLogs = logs.filter((log) => log.status === "Approved").length;
   const submittedLogs = logs.filter((log) => log.status !== "Draft").length;
   const averageScore = Math.round(
+    // Average all saved evaluation totals for the headline report card.
     evaluations.reduce((sum, evaluation) => sum + evaluation.total, 0) / evaluations.length,
   );
 
@@ -45,6 +48,7 @@ function Reports() {
       </div>
 
       <div className="cards-container">
+        {/* Summary cards give administrators the key statistics at a glance. */}
         <article className="report-stat">
           <span>Active Placements</span>
           <strong>{placements.length}</strong>
@@ -64,6 +68,7 @@ function Reports() {
       </div>
 
       <div className="section-grid">
+        {/* Bar chart uses CSS widths based on the evaluation weight percentages. */}
         <article className="panel">
           <div className="section-heading">
             <span className="section-heading__icon">
@@ -87,6 +92,7 @@ function Reports() {
           </div>
         </article>
 
+        {/* Workflow health counts how many logs are in each state. */}
         <article className="panel">
           <div className="section-heading">
             <span className="section-heading__icon section-heading__icon--green">
@@ -108,6 +114,7 @@ function Reports() {
         </article>
       </div>
 
+      {/* This table links course deliverables to the frontend evidence already built. */}
       <article className="panel table-panel">
         <div className="section-heading">
           <span className="section-heading__icon section-heading__icon--amber">

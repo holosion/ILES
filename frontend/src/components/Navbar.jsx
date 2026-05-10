@@ -3,6 +3,7 @@ import { courseInfo } from "../data/courseData";
 
 function Navbar() {
   return (
+    // Header stays visible at the top so users always know which system they are using.
     <header className="navbar">
       <div className="navbar__brand">
         <span className="navbar__logo" aria-hidden="true">
@@ -14,11 +15,13 @@ function Navbar() {
         </div>
       </div>
 
+      {/* Search is currently visual, ready to be connected to backend filtering later. */}
       <label className="navbar__search" aria-label="Search ILES records">
         <Search size={17} aria-hidden="true" />
         <input type="search" placeholder="Search logs, students, reports" />
       </label>
 
+      {/* Lecture time reminds students which CSC 1202 schedule this frontend follows. */}
       <div className="navbar__actions">
         <span className="navbar__chip">
           <CalendarDays size={16} aria-hidden="true" />

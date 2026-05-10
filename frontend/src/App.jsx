@@ -9,12 +9,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
   return (
+    // BrowserRouter enables page navigation without reloading the whole React app.
     <BrowserRouter>
       <Navbar />
 
       <div className="main-layout">
         <Sidebar />
         <main className="content">
+          {/* Each Route connects a URL path to the page component shown in the main content area. */}
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/weeklyLogs" element={<WeeklyLogs />} />

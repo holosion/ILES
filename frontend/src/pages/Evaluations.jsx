@@ -3,6 +3,7 @@ import { Calculator, CheckSquare, ClipboardCheck, Trophy } from "lucide-react";
 import { evaluationWeights, initialEvaluations } from "../data/courseData";
 
 const emptyEvaluation = {
+  // Empty shape used to reset the evaluation form after a record is saved.
   student: "",
   workplace: "",
   academic: "",
@@ -11,11 +12,13 @@ const emptyEvaluation = {
 };
 
 function getSavedEvaluations() {
+  // Browser storage keeps evaluation records while the frontend has no API connection.
   const savedEvaluations = localStorage.getItem("iles-evaluations");
   return savedEvaluations ? JSON.parse(savedEvaluations) : initialEvaluations;
 }
 
 function calculateGrade(total) {
+  // Converts the computed percentage into a simple grade label for reports.
   if (total >= 80) return "A";
   if (total >= 70) return "B";
   if (total >= 60) return "C";
@@ -24,6 +27,7 @@ function calculateGrade(total) {
 }
 
 function calculateTotal(evaluation) {
+  // Applies the 40/30/30 weighting from the course outline.
   return Math.round(
     evaluationWeights.reduce((sum, item) => {
       const rawScore = Number(evaluation[item.key] || 0);
@@ -33,17 +37,21 @@ function calculateTotal(evaluation) {
 }
 
 function Evaluations() {
+  // evaluations stores saved records; form stores the values currently being entered.
   const [evaluations, setEvaluations] = useState(getSavedEvaluations);
   const [form, setForm] = useState(emptyEvaluation);
 
   const liveTotal = useMemo(() => calculateTotal(form), [form]);
+  // The live grade changes as the user types scores, before the form is submitted.
   const liveGrade = calculateGrade(liveTotal);
 
   useEffect(() => {
+    // Save evaluation records locally until Django APIs replace localStorage.
     localStorage.setItem("iles-evaluations", JSON.stringify(evaluations));
   }, [evaluations]);
 
   function updateForm(field, value) {
+    // Update one input field without erasing the other fields.
     setForm((currentForm) => ({
       ...currentForm,
       [field]: value,
@@ -53,6 +61,7 @@ function Evaluations() {
   function handleSubmit(event) {
     event.preventDefault();
 
+    // Compute total and grade here so users cannot type an incorrect final mark.
     const total = calculateTotal(form);
     const newEvaluation = {
       ...form,
@@ -80,6 +89,7 @@ function Evaluations() {
       </div>
 
       <div className="cards-container">
+        {/* Weight cards make the scoring formula visible before data entry. */}
         {evaluationWeights.map((item) => (
           <article className="weight-card" key={item.key}>
             <span>{item.label}</span>
@@ -94,6 +104,7 @@ function Evaluations() {
       </div>
 
       <div className="section-grid">
+        {/* The form collects raw marks; calculation happens in JavaScript. */}
         <form className="panel form-panel" onSubmit={handleSubmit}>
           <div className="section-heading">
             <span className="section-heading__icon">
@@ -148,6 +159,7 @@ function Evaluations() {
           </button>
         </form>
 
+        {/* Formula panel helps during technical defence and code walkthroughs. */}
         <article className="panel">
           <div className="section-heading">
             <span className="section-heading__icon section-heading__icon--amber">
@@ -179,6 +191,7 @@ function Evaluations() {
         </article>
       </div>
 
+      {/* Saved results table shows the final computed evaluation records. */}
       <article className="panel table-panel">
         <div className="section-heading">
           <span className="section-heading__icon section-heading__icon--green">

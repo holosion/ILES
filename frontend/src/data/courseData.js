@@ -1,3 +1,5 @@
+// This file is the frontend's single source of truth for information taken from the CSC 1202 PDF.
+// Keeping this data here prevents every page from repeating the same course, role, and workflow text.
 export const courseInfo = {
   code: "CSC 1202",
   title: "Software Development Project",
@@ -11,6 +13,7 @@ export const courseInfo = {
 };
 
 export const roles = [
+  // These are the four core system users listed in the course outline.
   {
     name: "Student Intern",
     summary: "Creates placements, writes weekly logs, and submits work for review.",
@@ -34,6 +37,7 @@ export const roles = [
 ];
 
 export const workflowStates = [
+  // Logs move through these states as the student and supervisors work on them.
   {
     key: "Draft",
     label: "Draft",
@@ -57,6 +61,7 @@ export const workflowStates = [
 ];
 
 export const modules = [
+  // Core ILES modules expected in the final course project.
   "User & Role Management",
   "Internship Placement Module",
   "Weekly Logbook Module",
@@ -67,12 +72,14 @@ export const modules = [
 ];
 
 export const evaluationWeights = [
+  // The weighted scoring model comes from the evaluation and score computation week.
   { key: "workplace", label: "Workplace Supervisor", weight: 40 },
   { key: "academic", label: "Academic Supervisor", weight: 30 },
   { key: "logbook", label: "Weekly Logbook", weight: 30 },
 ];
 
 export const courseWeeks = [
+  // The 12-week timeline is used by the dashboard, logbook form, and reports page.
   { week: 1, title: "Introduction & SDLC", deliverable: "Project setup and Git branches" },
   { week: 2, title: "Requirements Engineering", deliverable: "User stories and workflow states" },
   { week: 3, title: "Database Design & ERD", deliverable: "ERD and workflow diagram" },
@@ -88,6 +95,7 @@ export const courseWeeks = [
 ];
 
 export const initialLogs = [
+  // Sample logs make the frontend useful before it is connected to a Django backend.
   {
     id: 1,
     week: "4",
@@ -124,6 +132,7 @@ export const initialLogs = [
 ];
 
 export const initialEvaluations = [
+  // Sample evaluations demonstrate the score table and reporting views immediately.
   {
     id: 1,
     student: "Akena Student",
@@ -147,6 +156,7 @@ export const initialEvaluations = [
 ];
 
 export const placements = [
+  // Sample placements represent the Internship Placement Module from the PDF.
   {
     student: "Akena Student",
     organization: "Community Health IT Office",

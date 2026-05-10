@@ -3,6 +3,7 @@ import { CheckCircle2, FilePenLine, RotateCcw, Send, Trash2 } from "lucide-react
 import { courseWeeks, initialLogs, workflowStates } from "../data/courseData";
 
 const emptyLog = {
+  // Empty shape used when the form starts or resets after saving.
   week: "",
   focusArea: "",
   hours: "",
@@ -13,25 +14,30 @@ const emptyLog = {
 };
 
 function getSavedLogs() {
+  // Browser storage keeps logs available after refresh until the Django backend exists.
   const savedLogs = localStorage.getItem("iles-weekly-logs");
   return savedLogs ? JSON.parse(savedLogs) : initialLogs;
 }
 
 function WeeklyLogs() {
+  // logs holds all records; form holds the current input values; editId tracks edit mode.
   const [logs, setLogs] = useState(getSavedLogs);
   const [form, setForm] = useState(emptyLog);
   const [editId, setEditId] = useState(null);
 
   const selectedWeek = useMemo(
+    // This finds the selected week so the page can show its expected deliverable.
     () => courseWeeks.find((week) => String(week.week) === String(form.week)),
     [form.week],
   );
 
   useEffect(() => {
+    // Every log change is saved locally so the prototype behaves like a small working system.
     localStorage.setItem("iles-weekly-logs", JSON.stringify(logs));
   }, [logs]);
 
   function updateForm(field, value) {
+    // Update only one form field while preserving the rest of the form.
     setForm((currentForm) => ({
       ...currentForm,
       [field]: value,
@@ -39,6 +45,7 @@ function WeeklyLogs() {
   }
 
   function resetForm() {
+    // Return the form to create mode after saving, clearing, or finishing an edit.
     setForm(emptyLog);
     setEditId(null);
   }
@@ -46,6 +53,7 @@ function WeeklyLogs() {
   function handleSubmit(event) {
     event.preventDefault();
 
+    // New logs always start as Draft; edited logs keep their existing workflow status.
     const nextLog = {
       ...form,
       id: editId ?? Date.now(),
@@ -53,6 +61,7 @@ function WeeklyLogs() {
       supervisorComment: form.supervisorComment || "Waiting for supervisor review.",
     };
 
+    // If editId exists, replace that log; otherwise add a fresh log at the top.
     setLogs((currentLogs) =>
       editId
         ? currentLogs.map((log) => (log.id === editId ? nextLog : log))
@@ -62,15 +71,18 @@ function WeeklyLogs() {
   }
 
   function editLog(log) {
+    // Load an existing log back into the form so the user can update it.
     setForm(log);
     setEditId(log.id);
   }
 
   function deleteLog(logId) {
+    // Remove only the selected log, leaving all other logs unchanged.
     setLogs((currentLogs) => currentLogs.filter((log) => log.id !== logId));
   }
 
   function moveStatus(logId, status) {
+    // Simulates supervisor workflow transitions before real backend permissions are added.
     setLogs((currentLogs) =>
       currentLogs.map((log) =>
         log.id === logId
@@ -101,6 +113,7 @@ function WeeklyLogs() {
       </div>
 
       <div className="workflow-strip">
+        {/* Workflow cards explain the allowed state journey for weekly logs. */}
         {workflowStates.map((state) => (
           <div className="workflow-step" key={state.key}>
             <strong>{state.label}</strong>
@@ -110,6 +123,7 @@ function WeeklyLogs() {
       </div>
 
       <div className="weekly-layout">
+        {/* Left side: data entry form for creating or editing weekly logs. */}
         <form className="panel form-panel" onSubmit={handleSubmit}>
           <div className="section-heading">
             <span className="section-heading__icon">
@@ -201,6 +215,7 @@ function WeeklyLogs() {
           </div>
         </form>
 
+        {/* Right side: workflow table for submitting, reviewing, approving, editing, and deleting. */}
         <div className="panel table-panel">
           <div className="section-heading">
             <span className="section-heading__icon section-heading__icon--green">

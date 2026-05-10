@@ -1,5 +1,6 @@
 function DashboardCard({ title, value, detail, icon: Icon, tone = "blue" }) {
   return (
+    // The tone class lets the same reusable card show different dashboard categories.
     <article className={`dashboard-card dashboard-card--${tone}`}>
       <div className="dashboard-card__top">
         {Icon ? (

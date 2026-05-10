@@ -19,6 +19,7 @@ import {
 } from "../data/courseData";
 
 function Home() {
+  // These dashboard numbers are calculated from the prototype data instead of being typed manually.
   const approvedLogs = initialLogs.filter((log) => log.status === "Reviewed").length;
   const averageScore = Math.round(
     initialEvaluations.reduce((sum, evaluation) => sum + evaluation.total, 0) /
@@ -27,6 +28,7 @@ function Home() {
 
   return (
     <section className="page-stack">
+      {/* Hero section explains the system purpose using details from the course outline. */}
       <div className="hero-panel">
         <div className="hero-panel__content">
           <span className="eyebrow">{courseInfo.code} / {courseInfo.year}</span>
@@ -57,6 +59,7 @@ function Home() {
         </div>
       </div>
 
+      {/* Metric cards give a quick overview of the current ILES prototype state. */}
       <div className="cards-container">
         <DashboardCard
           detail="Student, workplace, academic, and administrator views"
@@ -88,6 +91,7 @@ function Home() {
         />
       </div>
 
+      {/* These panels connect the frontend screens back to the official ILES modules. */}
       <div className="section-grid section-grid--wide-left">
         <article className="panel">
           <div className="section-heading">
@@ -130,6 +134,7 @@ function Home() {
         </article>
       </div>
 
+      {/* The timeline mirrors the 12-week build plan from the PDF. */}
       <article className="panel">
         <div className="section-heading">
           <span className="section-heading__icon section-heading__icon--amber">

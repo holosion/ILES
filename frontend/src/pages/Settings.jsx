@@ -3,6 +3,7 @@ import { LockKeyhole, Save, ShieldCheck, SlidersHorizontal, UserCog } from "luci
 import { courseInfo, roles } from "../data/courseData";
 
 const defaultSettings = {
+  // Prototype toggles represent business rules that a Django backend would later enforce.
   editingLock: true,
   deadlineAlerts: true,
   supervisorComments: true,
@@ -10,12 +11,14 @@ const defaultSettings = {
 };
 
 function Settings() {
+  // Load previously saved settings so the switches keep their values after refresh.
   const [settings, setSettings] = useState(() => {
     const savedSettings = localStorage.getItem("iles-settings");
     return savedSettings ? JSON.parse(savedSettings) : defaultSettings;
   });
 
   function toggleSetting(key) {
+    // Flip one setting while keeping the other switches unchanged.
     setSettings((currentSettings) => ({
       ...currentSettings,
       [key]: !currentSettings[key],
@@ -23,6 +26,7 @@ function Settings() {
   }
 
   function saveSettings() {
+    // Store workflow-control choices in the browser for this frontend prototype.
     localStorage.setItem("iles-settings", JSON.stringify(settings));
   }
 
@@ -38,6 +42,7 @@ function Settings() {
       </div>
 
       <div className="section-grid">
+        {/* Role cards explain who uses the system and what each person can do. */}
         <article className="panel">
           <div className="section-heading">
             <span className="section-heading__icon">
@@ -63,6 +68,7 @@ function Settings() {
           </div>
         </article>
 
+        {/* Settings switches model validation and workflow rules before backend integration. */}
         <article className="panel">
           <div className="section-heading">
             <span className="section-heading__icon section-heading__icon--green">
@@ -92,6 +98,7 @@ function Settings() {
         </article>
       </div>
 
+      {/* Defence notes summarize why these frontend screens match the PDF requirements. */}
       <article className="panel">
         <div className="section-heading">
           <span className="section-heading__icon section-heading__icon--amber">
