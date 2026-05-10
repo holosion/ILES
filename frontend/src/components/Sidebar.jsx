@@ -1,39 +1,58 @@
-import { Link } from "react-router-dom";
+import {
+  BarChart3,
+  ClipboardCheck,
+  FileText,
+  Home,
+  Settings,
+  ShieldCheck,
+} from "lucide-react";
+import { NavLink } from "react-router-dom";
+import { courseInfo, workflowStates } from "../data/courseData";
+
+const links = [
+  { to: "/", label: "Dashboard", icon: Home },
+  { to: "/weeklyLogs", label: "Weekly Logs", icon: FileText },
+  { to: "/Evaluations", label: "Evaluations", icon: ClipboardCheck },
+  { to: "/Reports", label: "Reports", icon: BarChart3 },
+  { to: "/Settings", label: "Settings", icon: Settings },
+];
 
 function Sidebar() {
-    return (
-        <div className="sidebar">
-
-            <h2>Dashboard</h2>
-
-            <ul className="sidebar-links">
-
-                <li>
-                    <Link to="/">Home</Link>
-                </li>
-
-                <li>
-                    <Link to="/weeklyLogs">Weekly Logs</Link>
-                </li>
-
-                <li>
-                    <Link to="/Evaluations">Evaluations</Link>
-                </li>
-
-                <li>
-                    <Link to="/Reports">Reports</Link>
-                </li>
-                
-
-                <li>
-                    <Link to="/Settings">Settings</Link>
-                </li>
-
-
-            </ul>
+  return (
+    <aside className="sidebar">
+      <div className="sidebar__header">
+        <span className="sidebar__mark" aria-hidden="true">
+          <ShieldCheck size={22} />
+        </span>
+        <div>
+          <strong>{courseInfo.systemName}</strong>
+          <span>Workflow control panel</span>
         </div>
-        
-    );
+      </div>
+
+      <nav className="sidebar__nav" aria-label="Main navigation">
+        {links.map(({ to, label, icon: Icon }) => (
+          <NavLink
+            className={({ isActive }) =>
+              isActive ? "sidebar__link sidebar__link--active" : "sidebar__link"
+            }
+            key={to}
+            to={to}
+          >
+            <Icon size={18} aria-hidden="true" />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="sidebar__workflow">
+        <span>Workflow states</span>
+        {workflowStates.map((state) => (
+          <small key={state.key}>{state.label}</small>
+        ))}
+      </div>
+    </aside>
+  );
 }
 
 export default Sidebar;
