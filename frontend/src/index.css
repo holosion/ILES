@@ -1,0 +1,205 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+}
+
+h1 {
+  color:aquamarine;
+  padding: 20px;
+}
+
+p {
+  padding-left: 20px;
+}
+
+.navbar {
+  background-color:darkblue;
+  color: white;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+
+}
+.nav-links li{
+  cursor: pointer;
+
+}
+.main-layout {
+  display: flex;
+}
+
+.sidebar {
+  width: 250px;
+  height: 100vh;
+
+  background-color: #1e1e2f;
+  color: white;
+  padding: 20px;
+
+}
+
+.sidebar-links {
+  list-style: none;
+  padding: 0;
+
+}
+
+.sidebar-links li {
+  margin: 20px 0;
+  cursor: pointer;
+}
+
+.content {
+  padding: 20px;
+  flex: 1;
+}
+
+.cards-container {
+  display: flex;
+  gap: 20px;
+
+  flex-wrap: wrap;
+  margin-top: 20px;
+
+}
+.dashboard-card {
+  background-color: white;
+
+  width:300px;
+
+  padding: 20px;
+
+  border-radius: 8px;
+
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+}
+.dashboard-card h3 {
+  margin: 0;
+  font-size: 18px;
+
+}
+
+dashboard-card p {
+  font-size: 28px;
+  font-weight: bold;
+
+  color: darkblue;
+}
+
+.sidebar a {
+  color: white;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  text-decoration: underline;
+}
+
+form {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+}
+
+input,textarea {
+  width: 100%;
+  padding: 10px;
+
+  margin-top: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background-color: darkblue;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #00008b;
+}
+
+.log-card {
+  background-color: white;
+
+  padding: 15px;
+
+  margin-top: 15px;
+
+  border-radius: 10px;
+
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+  width: 400px;
+}
+
+.logs-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  margin-top: 20px;
+
+  background-color: white;
+}
+
+.logs-table th,
+.logs-table td {
+  border: 1px solid #ddd;
+
+  padding: 12px;
+
+  text-align: left;
+}
+
+.logs-table th {
+  background-color: darkblue;
+
+  color: white;
+}
+
+.status {
+  background-color: orange;
+
+  color: white;
+
+  padding: 5px 10px;
+
+  border-radius: 5px;
+
+  font-size: 14px;
+}
+
+/* Weekly Logs page layout */
+.weekly-layout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.weekly-left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.weekly-right {
+  background: transparent;
+}
+
+@media (max-width: 800px) {
+  .weekly-layout {
+    grid-template-columns: 1fr;
+  }
+}
