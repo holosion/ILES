@@ -1,7 +1,7 @@
-import { Bell, CalendarDays, GraduationCap, Search } from "lucide-react";
+import { Bell, CalendarDays, GraduationCap, LogOut, Search } from "lucide-react";
 import { courseInfo } from "../data/courseData";
 
-function Navbar() {
+function Navbar({ account, onLogout }) {
   return (
     // Header stays visible at the top so users always know which system they are using.
     <header className="navbar">
@@ -25,10 +25,22 @@ function Navbar() {
       <div className="navbar__actions">
         <span className="navbar__chip">
           <CalendarDays size={16} aria-hidden="true" />
-          {courseInfo.dayLecture}
+          {new Date().toLocaleDateString(undefined, {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })}
+        </span>
+        <span className="navbar__chip">
+          <GraduationCap size={16} aria-hidden="true" />
+          {account.display_name}
         </span>
         <button className="icon-button" type="button" aria-label="View notifications">
           <Bell size={18} />
+        </button>
+        <button className="icon-button" onClick={onLogout} type="button" aria-label="Logout">
+          <LogOut size={18} />
         </button>
       </div>
     </header>

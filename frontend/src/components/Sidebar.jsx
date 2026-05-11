@@ -18,7 +18,17 @@ const links = [
   { to: "/Settings", label: "Settings", icon: Settings },
 ];
 
-function Sidebar() {
+function Sidebar({ account }) {
+  const visibleLinks = links.filter((link) => {
+    if (account.role === "lecturer") {
+      return link.to !== "/weeklyLogs";
+    }
+    if (account.role === "company") {
+      return link.to !== "/Evaluations" && link.to !== "/Reports";
+    }
+    return true;
+  });
+
   return (
     // Aside is used because this is supporting navigation beside the main page content.
     <aside className="sidebar">
@@ -33,7 +43,7 @@ function Sidebar() {
       </div>
 
       <nav className="sidebar__nav" aria-label="Main navigation">
-        {links.map(({ to, label, icon: Icon }) => (
+        {visibleLinks.map(({ to, label, icon: Icon }) => (
           // NavLink automatically tells us when the current URL matches this link.
           <NavLink
             className={({ isActive }) =>
@@ -50,10 +60,12 @@ function Sidebar() {
 
       {/* This mini guide helps users remember the correct weekly-log workflow order. */}
       <div className="sidebar__workflow">
-        <span>Workflow states</span>
-        {workflowStates.map((state) => (
-          <small key={state.key}>{state.label}</small>
-        ))}
+        <span>{account.role === "company" ? "Company workspace" : "Lecturer workspace"}</span>
+        {account.role === "company"
+          ? workflowStates.map((state) => <small key={state.key}>{state.label}</small>)
+          : ["Companies", "Students", "Weekly Reports", "Marks"].map((item) => (
+              <small key={item}>{item}</small>
+            ))}
       </div>
     </aside>
   );

@@ -72,10 +72,10 @@ export const modules = [
 ];
 
 export const evaluationWeights = [
-  // The weighted scoring model comes from the evaluation and score computation week.
-  { key: "workplace", label: "Workplace Supervisor", weight: 40 },
-  { key: "academic", label: "Academic Supervisor", weight: 30 },
-  { key: "logbook", label: "Weekly Logbook", weight: 30 },
+  // These match the beginner-friendly Django Evaluation model fields.
+  { key: "technical", label: "Technical", weight: 100 },
+  { key: "communication", label: "Communication", weight: 100 },
+  { key: "attendance", label: "Attendance", weight: 100 },
 ];
 
 export const courseWeeks = [

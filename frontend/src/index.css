@@ -820,6 +820,217 @@ button:disabled {
   color: #60748b;
 }
 
+.auth-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(22rem, 30rem);
+  gap: 1.25rem;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.auth-hero {
+  display: grid;
+  gap: 0.85rem;
+  align-content: center;
+  min-height: calc(100vh - 3rem);
+  padding: 2rem;
+  border-radius: 1rem;
+  color: #ffffff;
+  background:
+    linear-gradient(120deg, rgba(16, 33, 51, 0.92), rgba(0, 106, 117, 0.8)),
+    url("/src/assets/hero.png") center / cover;
+}
+
+.auth-hero h1 {
+  max-width: 48rem;
+  margin: 0;
+  font-size: clamp(2.4rem, 5vw, 5rem);
+  line-height: 1.02;
+}
+
+.auth-hero p {
+  max-width: 44rem;
+  color: #d9edf1;
+  font-size: 1.05rem;
+}
+
+.auth-panel {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(96, 116, 139, 0.16);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 1rem 2.5rem rgba(18, 31, 49, 0.08);
+}
+
+.segmented-control,
+.role-selector {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  padding: 0.35rem;
+  border-radius: 0.75rem;
+  background: #e9f0f6;
+}
+
+.segmented-control__item,
+.role-choice,
+.selection-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.65rem;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: 0.6rem;
+  color: #314359;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.segmented-control__item.active,
+.role-choice.active,
+.selection-item.active {
+  color: #ffffff;
+  background: #006a75;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.profile-preview,
+.photo-placeholder {
+  width: 7rem;
+  height: 7rem;
+  border-radius: 0.75rem;
+}
+
+.profile-preview {
+  object-fit: cover;
+  border: 1px solid #dbe5ee;
+}
+
+.photo-placeholder {
+  display: grid;
+  place-items: center;
+  color: #60748b;
+  background: #f8fbfd;
+  border: 1px dashed #b8c8d6;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.student-summary,
+.student-profile-panel,
+.lecturer-badge {
+  display: flex;
+  align-items: center;
+}
+
+.student-summary {
+  gap: 0.75rem;
+  padding: 0.8rem;
+  border: 1px solid #dbe5ee;
+  border-radius: 0.75rem;
+  background: #f8fbfd;
+}
+
+.student-summary img,
+.student-summary span,
+.selection-item img,
+.student-profile-panel img,
+.student-profile-panel__avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.7rem;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.student-summary span,
+.student-profile-panel__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background: #315f9e;
+  font-weight: 900;
+}
+
+.student-summary small,
+.selection-item small,
+.student-profile-panel small {
+  display: block;
+  color: #60748b;
+}
+
+.selection-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.selection-item {
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 3.4rem;
+  border: 1px solid #dbe5ee;
+  background: #f8fbfd;
+  text-align: left;
+}
+
+.selection-item.active small {
+  color: #d9edf1;
+}
+
+.student-profile-panel {
+  gap: 1rem;
+}
+
+.student-profile-panel img,
+.student-profile-panel__avatar {
+  width: 5rem;
+  height: 5rem;
+}
+
+.student-profile-panel h2 {
+  margin: 0.25rem 0 0;
+}
+
+.student-profile-panel p {
+  margin: 0.25rem 0;
+  color: #314359;
+}
+
+.lecturer-badge {
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0 0.85rem;
+  border-radius: 0.7rem;
+  color: #ffffff;
+  background: #102133;
+  font-weight: 800;
+}
+
+.grade-controls {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 12rem;
+}
+
+.grade-controls input {
+  max-width: 7rem;
+}
+
+.logs-table small svg {
+  vertical-align: -0.12rem;
+}
+
 @media (max-width: 1100px) {
   /* Tablet breakpoint: collapse complex grids into easier stacked layouts. */
   .navbar {
@@ -839,8 +1050,13 @@ button:disabled {
   .section-grid,
   .section-grid--wide-left,
   .weekly-layout,
-  .hero-panel {
+  .hero-panel,
+  .auth-page {
     grid-template-columns: 1fr;
+  }
+
+  .auth-hero {
+    min-height: 24rem;
   }
 }
 
@@ -869,7 +1085,8 @@ button:disabled {
 
   .page-title--row,
   .workflow-strip,
-  .defence-grid {
+  .defence-grid,
+  .form-row {
     grid-template-columns: 1fr;
   }
 

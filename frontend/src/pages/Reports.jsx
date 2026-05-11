@@ -1,157 +1,356 @@
-import { BarChart3, Download, FileText, PieChart, Printer } from "lucide-react";
-import {
-  courseWeeks,
-  evaluationWeights,
-  initialEvaluations,
-  initialLogs,
-  placements,
-} from "../data/courseData";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { BarChart3, Building2, ClipboardCheck, FileText, Save, UserRound } from "lucide-react";
+import { getCompanies, getDashboardStats, getStudents, getWeeklyReports, updateWeeklyReport } from "../api";
 
-function readStoredData(key, fallback) {
-  // Reports should reflect user-created data when it exists, otherwise use demo data.
-  const savedData = localStorage.getItem(key);
-  return savedData ? JSON.parse(savedData) : fallback;
+function suggestedMark(report) {
+  const attendanceScore = Math.round((Number(report.attendance_days || 0) / 7) * 35);
+  const activityScore = Math.min(45, Math.round((report.activities || "").length / 8));
+  const commentScore = report.company_comments ? 20 : 10;
+  return Math.min(100, attendanceScore + activityScore + commentScore);
 }
 
-function Reports() {
-  // Pull current prototype data from localStorage so reports update after form actions.
-  const logs = readStoredData("iles-weekly-logs", initialLogs);
-  const evaluations = readStoredData("iles-evaluations", initialEvaluations);
-  const approvedLogs = logs.filter((log) => log.status === "Approved").length;
-  const submittedLogs = logs.filter((log) => log.status !== "Draft").length;
-  const averageScore = Math.round(
-    // Average all saved evaluation totals for the headline report card.
-    evaluations.reduce((sum, evaluation) => sum + evaluation.total, 0) / evaluations.length,
+function Reports({ account }) {
+  const [companies, setCompanies] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [stats, setStats] = useState({
+    total_companies: 0,
+    total_students: 0,
+    total_reports: 0,
+    graded_reports: 0,
+  });
+  const [selectedCompany, setSelectedCompany] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState("");
+  const [gradeForms, setGradeForms] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const activeStudent = useMemo(
+    () => students.find((student) => String(student.id) === String(selectedStudent)),
+    [selectedStudent, students],
   );
+
+  const loadLecturerData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [companiesResponse, statsResponse] = await Promise.all([
+        getCompanies(),
+        getDashboardStats(),
+      ]);
+      setCompanies(companiesResponse.data);
+      setStats(statsResponse.data);
+      setError("");
+    } catch {
+      setError("Could not load lecturer report data. Make sure the Django server is running.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadCompanyStudents = useCallback(async (companyId) => {
+    try {
+      const response = await getStudents(companyId);
+      setStudents(response.data);
+      setSelectedStudent("");
+      setReports([]);
+    } catch {
+      setError("Could not load students for this company.");
+    }
+  }, []);
+
+  const loadStudentReports = useCallback(async (studentId) => {
+    try {
+      const response = await getWeeklyReports({ student: studentId });
+      setReports(response.data);
+      setGradeForms(
+        response.data.reduce((forms, report) => {
+          forms[report.id] = {
+            lecturer_mark: report.lecturer_mark ?? suggestedMark(report),
+            lecturer_comments: report.lecturer_comments || "",
+          };
+          return forms;
+        }, {}),
+      );
+    } catch {
+      setError("Could not load the selected student's reports.");
+    }
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      loadLecturerData();
+    }, 0);
+    return () => clearTimeout(timeoutId);
+  }, [loadLecturerData]);
+
+  useEffect(() => {
+    if (selectedCompany) {
+      const timeoutId = setTimeout(() => {
+        loadCompanyStudents(selectedCompany);
+      }, 0);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [loadCompanyStudents, selectedCompany]);
+
+  useEffect(() => {
+    if (selectedStudent) {
+      const timeoutId = setTimeout(() => {
+        loadStudentReports(selectedStudent);
+      }, 0);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [loadStudentReports, selectedStudent]);
+
+  function chooseCompany(companyId) {
+    setSelectedCompany(companyId);
+    setSelectedStudent("");
+    setStudents([]);
+    setReports([]);
+  }
+
+  function chooseStudent(studentId) {
+    setSelectedStudent(studentId);
+    setReports([]);
+  }
+
+  function updateGradeForm(reportId, field, value) {
+    setGradeForms((currentForms) => ({
+      ...currentForms,
+      [reportId]: {
+        ...currentForms[reportId],
+        [field]: value,
+      },
+    }));
+  }
+
+  async function saveGrade(report) {
+    const gradeForm = gradeForms[report.id];
+    try {
+      await updateWeeklyReport(report.id, {
+        student: report.student,
+        week_number: report.week_number,
+        week_start: report.week_start,
+        week_end: report.week_end,
+        attendance_days: report.attendance_days,
+        activities: report.activities,
+        company_comments: report.company_comments,
+        lecturer_mark: Number(gradeForm.lecturer_mark),
+        lecturer_comments: gradeForm.lecturer_comments,
+      });
+      await Promise.all([loadStudentReports(selectedStudent), loadLecturerData()]);
+    } catch {
+      setError("Could not save the lecturer mark. Marks must be between 0 and 100.");
+    }
+  }
 
   return (
     <section className="page-stack">
       <div className="page-title page-title--row">
         <div>
-          <span className="eyebrow">Week 10 practical task</span>
-          <h1>Dashboards & Reporting</h1>
+          <span className="eyebrow">Lecturer workspace</span>
+          <h1>Company Reports & Student Grading</h1>
           <p>
-            Aggregated views for student progress, supervisor pending reviews, administrator
-            statistics, and final documentation readiness.
+            Select a company, open a student profile, review weekly generated reports, and assign
+            marks from the attendance, activities, and company comments.
           </p>
         </div>
-        <div className="form-actions">
-          <button className="button button--secondary" type="button">
-            <Printer size={16} />
-            Print
-          </button>
-          <button className="button button--primary" type="button">
-            <Download size={16} />
-            Export
-          </button>
+        <div className="lecturer-badge">
+          <UserRound size={18} />
+          {account.display_name}
         </div>
       </div>
 
       <div className="cards-container">
-        {/* Summary cards give administrators the key statistics at a glance. */}
         <article className="report-stat">
-          <span>Active Placements</span>
-          <strong>{placements.length}</strong>
+          <span>Companies</span>
+          <strong>{stats.total_companies}</strong>
         </article>
         <article className="report-stat">
-          <span>Submitted Logs</span>
-          <strong>{submittedLogs}</strong>
+          <span>Students</span>
+          <strong>{stats.total_students}</strong>
         </article>
         <article className="report-stat">
-          <span>Approved Logs</span>
-          <strong>{approvedLogs}</strong>
+          <span>Weekly Reports</span>
+          <strong>{stats.total_reports}</strong>
         </article>
         <article className="report-stat">
-          <span>Average Score</span>
-          <strong>{averageScore}%</strong>
+          <span>Graded</span>
+          <strong>{stats.graded_reports}</strong>
         </article>
       </div>
 
       <div className="section-grid">
-        {/* Bar chart uses CSS widths based on the evaluation weight percentages. */}
         <article className="panel">
           <div className="section-heading">
             <span className="section-heading__icon">
-              <BarChart3 size={20} />
+              <Building2 size={20} />
             </span>
             <div>
-              <h2>Evaluation Distribution</h2>
-              <p>Weighted score breakdown across the three required criteria.</p>
+              <h2>Companies</h2>
+              <p>Lecturers can view report data without entering the company workspace.</p>
             </div>
           </div>
-          <div className="bar-list">
-            {evaluationWeights.map((item) => (
-              <div className="bar-row" key={item.key}>
-                <span>{item.label}</span>
-                <div className="bar-track">
-                  <div className="bar-fill" style={{ width: `${item.weight}%` }} />
-                </div>
-                <strong>{item.weight}%</strong>
-              </div>
+          <div className="selection-list">
+            {loading ? <div className="inline-note">Loading companies...</div> : null}
+            {companies.map((company) => (
+              <button
+                className={String(selectedCompany) === String(company.id) ? "selection-item active" : "selection-item"}
+                key={company.id}
+                onClick={() => chooseCompany(company.id)}
+                type="button"
+              >
+                <Building2 size={18} />
+                <span>
+                  <strong>{company.display_name}</strong>
+                  <small>{company.email}</small>
+                </span>
+              </button>
             ))}
+            {!loading && companies.length === 0 ? (
+              <div className="inline-note">No company accounts have been verified yet.</div>
+            ) : null}
           </div>
         </article>
 
-        {/* Workflow health counts how many logs are in each state. */}
         <article className="panel">
           <div className="section-heading">
             <span className="section-heading__icon section-heading__icon--green">
-              <PieChart size={20} />
+              <UserRound size={20} />
             </span>
             <div>
-              <h2>Workflow Health</h2>
-              <p>Logbook state counts help supervisors see what needs attention.</p>
+              <h2>Students</h2>
+              <p>Choose a student to open the generated weekly reports.</p>
             </div>
           </div>
-          <div className="status-grid">
-            {["Draft", "Submitted", "Reviewed", "Approved"].map((status) => (
-              <div className="status-tile" key={status}>
-                <span>{status}</span>
-                <strong>{logs.filter((log) => log.status === status).length}</strong>
-              </div>
+          <div className="selection-list">
+            {students.map((student) => (
+              <button
+                className={String(selectedStudent) === String(student.id) ? "selection-item active" : "selection-item"}
+                key={student.id}
+                onClick={() => chooseStudent(student.id)}
+                type="button"
+              >
+                {student.photo ? <img src={student.photo} alt={student.name} /> : <UserRound size={18} />}
+                <span>
+                  <strong>{student.name}</strong>
+                  <small>{student.registration_number} / {student.university}</small>
+                </span>
+              </button>
             ))}
+            {selectedCompany && students.length === 0 ? (
+              <div className="inline-note">This company has not added students yet.</div>
+            ) : null}
           </div>
         </article>
       </div>
 
-      {/* This table links course deliverables to the frontend evidence already built. */}
+      {activeStudent ? (
+        <article className="panel student-profile-panel">
+          {activeStudent.photo ? (
+            <img src={activeStudent.photo} alt={activeStudent.name} />
+          ) : (
+            <div className="student-profile-panel__avatar">
+              {activeStudent.name.slice(0, 1).toUpperCase()}
+            </div>
+          )}
+          <div>
+            <span className="eyebrow">Student profile</span>
+            <h2>{activeStudent.name}</h2>
+            <p>{activeStudent.registration_number} / {activeStudent.university}</p>
+            <small>{activeStudent.internship_months} month internship</small>
+          </div>
+        </article>
+      ) : null}
+
       <article className="panel table-panel">
         <div className="section-heading">
           <span className="section-heading__icon section-heading__icon--amber">
             <FileText size={20} />
           </span>
           <div>
-            <h2>Final Deliverable Tracker</h2>
-            <p>Matches the timeline in the CSC 1202 course outline.</p>
+            <h2>Weekly Reports</h2>
+            <p>Suggested marks can be adjusted before saving the lecturer grade.</p>
           </div>
         </div>
+
+        {error ? <div className="inline-note">{error}</div> : null}
+
         <div className="responsive-table">
           <table className="logs-table">
             <thead>
               <tr>
                 <th>Week</th>
-                <th>Topic</th>
-                <th>Expected Deliverable</th>
-                <th>Frontend Evidence</th>
+                <th>Attendance</th>
+                <th>Activities</th>
+                <th>Company Comment</th>
+                <th>Grade</th>
+                <th>Lecturer Mark</th>
               </tr>
             </thead>
             <tbody>
-              {courseWeeks.map((week) => (
-                <tr key={week.week}>
-                  <td>Week {week.week}</td>
-                  <td>{week.title}</td>
-                  <td>{week.deliverable}</td>
+              {reports.length === 0 ? (
+                <tr>
+                  <td colSpan="6">Select a company and student to view generated weekly reports.</td>
+                </tr>
+              ) : reports.map((report) => (
+                <tr key={report.id}>
                   <td>
-                    {week.week < 6
-                      ? "Dashboard and placement screens"
-                      : week.week < 10
-                        ? "Logbook, review, and evaluation screens"
-                        : "Reports, documentation, and deployment readiness"}
+                    <strong>Week {report.week_number}</strong>
+                    <small>{report.week_start} to {report.week_end}</small>
+                  </td>
+                  <td>{report.attendance_days} / 7 days</td>
+                  <td>{report.activities}</td>
+                  <td>{report.company_comments || "No comment added"}</td>
+                  <td>
+                    <span className="status status--approved">
+                      {report.lecturer_mark === null ? "Pending" : report.grade}
+                    </span>
+                    <small>
+                      <BarChart3 size={13} /> Suggested {suggestedMark(report)}%
+                    </small>
+                  </td>
+                  <td>
+                    <div className="grade-controls">
+                      <input
+                        inputMode="numeric"
+                        max="100"
+                        min="0"
+                        type="number"
+                        value={gradeForms[report.id]?.lecturer_mark ?? ""}
+                        onChange={(event) =>
+                          updateGradeForm(report.id, "lecturer_mark", event.target.value)
+                        }
+                      />
+                      <textarea
+                        rows="2"
+                        value={gradeForms[report.id]?.lecturer_comments ?? ""}
+                        onChange={(event) =>
+                          updateGradeForm(report.id, "lecturer_comments", event.target.value)
+                        }
+                        placeholder="Lecturer comments"
+                      />
+                      <button className="button button--primary" onClick={() => saveGrade(report)} type="button">
+                        <Save size={16} />
+                        Save Mark
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      </article>
+
+      <article className="panel">
+        <div className="section-heading">
+          <span className="section-heading__icon">
+            <ClipboardCheck size={20} />
+          </span>
+          <div>
+            <h2>Grading System</h2>
+            <p>Suggested score: attendance 35%, activity detail 45%, company comment 20%.</p>
+          </div>
         </div>
       </article>
     </section>

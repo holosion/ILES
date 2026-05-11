@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   BookOpenCheck,
   ClipboardList,
@@ -6,12 +7,11 @@ import {
   LayoutDashboard,
   UsersRound,
 } from "lucide-react";
+import { getDashboardStats } from "../api";
 import DashboardCard from "../components/DashboardCard";
 import {
   courseInfo,
   courseWeeks,
-  initialEvaluations,
-  initialLogs,
   modules,
   placements,
   roles,
@@ -19,12 +19,21 @@ import {
 } from "../data/courseData";
 
 function Home() {
-  // These dashboard numbers are calculated from the prototype data instead of being typed manually.
-  const approvedLogs = initialLogs.filter((log) => log.status === "Reviewed").length;
-  const averageScore = Math.round(
-    initialEvaluations.reduce((sum, evaluation) => sum + evaluation.total, 0) /
-      initialEvaluations.length,
-  );
+  // Dashboard stats come from Django so the homepage reflects real SQLite data.
+  const [stats, setStats] = useState({
+    total_logs: 0,
+    reviewed_logs: 0,
+    average_score: 0,
+  });
+
+  useEffect(() => {
+    // The dashboard endpoint gives React already-calculated backend statistics.
+    getDashboardStats()
+      .then((response) => setStats(response.data))
+      .catch(() => {
+        // If Django is off, keep the page usable with zero values.
+      });
+  }, []);
 
   return (
     <section className="page-stack">
@@ -76,18 +85,18 @@ function Home() {
           value={workflowStates.length}
         />
         <DashboardCard
-          detail={`${approvedLogs} reviewed in the prototype dataset`}
+          detail={`${stats.reviewed_logs} reviewed in the backend database`}
           icon={ClipboardList}
           title="Weekly Logs"
           tone="amber"
-          value={initialLogs.length}
+          value={stats.total_logs}
         />
         <DashboardCard
-          detail="Weighted from workplace, academic, and logbook marks"
+          detail="Calculated from technical, communication, and attendance marks"
           icon={Gauge}
           title="Average Score"
           tone="green"
-          value={`${averageScore}%`}
+          value={`${stats.average_score}%`}
         />
       </div>
 
