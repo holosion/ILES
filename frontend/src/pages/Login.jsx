@@ -71,10 +71,16 @@ function Login({ onLogin }) {
       const response = await loginAccount({
         email: form.email,
         password: form.password,
+        google_signup: form.google_signup,
       });
       onLogin(response.data);
     } catch (error) {
-      setMessage(error.response?.data?.detail || "Could not log in.");
+      const responseData = error.response?.data;
+      if (error.response?.status === 403 && responseData?.verification_code) {
+        setDemoCode(responseData.verification_code);
+        setMode("verify");
+      }
+      setMessage(responseData?.detail || "Could not log in. Make sure the backend server is running.");
     } finally {
       setLoading(false);
     }
@@ -139,11 +145,19 @@ function Login({ onLogin }) {
             <label>
               Password
               <input
-                required
+                required={!form.google_signup}
                 type="password"
                 value={form.password}
                 onChange={(event) => updateForm("password", event.target.value)}
                 placeholder="Account password"
+              />
+            </label>
+            <label className="toggle-row">
+              <span>Continue with Google account</span>
+              <input
+                checked={form.google_signup}
+                onChange={(event) => updateForm("google_signup", event.target.checked)}
+                type="checkbox"
               />
             </label>
             <button className="button button--primary" disabled={loading} type="submit">

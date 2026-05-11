@@ -6,6 +6,58 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.db import models
 
 
+def makerere_grade(mark):
+    if mark is None:
+        return "Pending"
+    if mark >= 90:
+        return "A+"
+    if mark >= 80:
+        return "A"
+    if mark >= 75:
+        return "B+"
+    if mark >= 70:
+        return "B"
+    if mark >= 65:
+        return "C+"
+    if mark >= 60:
+        return "C"
+    if mark >= 55:
+        return "D+"
+    if mark >= 50:
+        return "D"
+    if mark >= 45:
+        return "E"
+    if mark >= 40:
+        return "E-"
+    return "F"
+
+
+def makerere_interpretation(mark):
+    if mark is None:
+        return "Not graded"
+    if mark >= 90:
+        return "Exceptional"
+    if mark >= 80:
+        return "Excellent"
+    if mark >= 75:
+        return "Very Good"
+    if mark >= 70:
+        return "Good"
+    if mark >= 65:
+        return "Fairly Good"
+    if mark >= 60:
+        return "Fair"
+    if mark >= 55:
+        return "Pass"
+    if mark >= 50:
+        return "Marginal Pass"
+    if mark >= 45:
+        return "Marginal Fail"
+    if mark >= 40:
+        return "Clear Fail"
+    return "Bad Fail"
+
+
 class Account(models.Model):
     ROLE_COMPANY = "company"
     ROLE_LECTURER = "lecturer"
@@ -61,6 +113,21 @@ class StudentProfile(models.Model):
     def __str__(self):
         return f"{self.name} - {self.registration_number}"
 
+    @property
+    def final_mark(self):
+        marks = [report.lecturer_mark for report in self.reports.all() if report.lecturer_mark is not None]
+        if not marks:
+            return None
+        return round(sum(marks) / len(marks))
+
+    @property
+    def final_grade(self):
+        return makerere_grade(self.final_mark)
+
+    @property
+    def final_interpretation(self):
+        return makerere_interpretation(self.final_mark)
+
 
 class WeeklyReport(models.Model):
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="reports")
@@ -81,17 +148,11 @@ class WeeklyReport(models.Model):
 
     @property
     def grade(self):
-        if self.lecturer_mark is None:
-            return "Pending"
-        if self.lecturer_mark >= 80:
-            return "A"
-        if self.lecturer_mark >= 70:
-            return "B"
-        if self.lecturer_mark >= 60:
-            return "C"
-        if self.lecturer_mark >= 50:
-            return "D"
-        return "Needs Support"
+        return makerere_grade(self.lecturer_mark)
+
+    @property
+    def interpretation(self):
+        return makerere_interpretation(self.lecturer_mark)
 
     def __str__(self):
         return f"{self.student.name} - Week {self.week_number}"

@@ -88,8 +88,21 @@ def register_account(request):
         return Response({"detail": "Company name is required for company accounts."}, status=400)
     if role == Account.ROLE_LECTURER and not name:
         return Response({"detail": "Lecturer name is required for lecturer accounts."}, status=400)
-    if Account.objects.filter(email=email).exists():
-        return Response({"detail": "An account with this email already exists."}, status=400)
+    existing_account = Account.objects.filter(email=email).first()
+    if existing_account and existing_account.is_verified:
+        return Response({"detail": "An account with this email already exists. Use the login form."}, status=400)
+    if existing_account:
+        existing_account.role = role
+        existing_account.name = name or company_name
+        existing_account.company_name = company_name
+        existing_account.verification_code = Account.generate_code()
+        if password:
+            existing_account.set_password(password)
+        existing_account.save()
+        data = AccountSerializer(existing_account).data
+        data["verification_code"] = existing_account.verification_code
+        data["message"] = "A fresh verification code has been sent. Use it to activate this account."
+        return Response(data)
 
     account = Account(
         role=role,
@@ -129,6 +142,7 @@ def verify_account(request):
 def login_account(request):
     email = request.data.get("email", "").strip().lower()
     password = request.data.get("password", "")
+    google_signup = request.data.get("google_signup", False)
 
     try:
         account = Account.objects.get(email=email)
@@ -136,8 +150,17 @@ def login_account(request):
         return Response({"detail": "Account not found."}, status=404)
 
     if not account.is_verified:
-        return Response({"detail": "Please verify your email before logging in."}, status=403)
-    if not account.check_password(password):
+        account.verification_code = Account.generate_code()
+        account.save(update_fields=["verification_code"])
+        return Response(
+            {
+                "detail": "Please verify your email before logging in.",
+                "email": account.email,
+                "verification_code": account.verification_code,
+            },
+            status=403,
+        )
+    if not google_signup and not account.check_password(password):
         return Response({"detail": "Incorrect password."}, status=400)
 
     return Response(AccountSerializer(account).data)

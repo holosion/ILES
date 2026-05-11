@@ -992,6 +992,10 @@ button:disabled {
   gap: 1rem;
 }
 
+.student-profile-panel > div:nth-child(2) {
+  flex: 1;
+}
+
 .student-profile-panel img,
 .student-profile-panel__avatar {
   width: 5rem;
@@ -1025,6 +1029,50 @@ button:disabled {
 
 .grade-controls input {
   max-width: 7rem;
+}
+
+.final-mark-card {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 12rem;
+  padding: 0.85rem;
+  border-radius: 0.75rem;
+  color: #ffffff;
+  background: #102133;
+}
+
+.final-mark-card span,
+.final-mark-card small {
+  color: #bfd0df;
+}
+
+.final-mark-card strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.grade-scale {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0.55rem;
+}
+
+.grade-scale__item {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem;
+  border: 1px solid #dbe5ee;
+  border-radius: 0.7rem;
+  background: #f8fbfd;
+}
+
+.grade-scale__item strong {
+  color: #006a75;
+}
+
+.grade-scale__item span,
+.grade-scale__item small {
+  color: #60748b;
 }
 
 .logs-table small svg {
