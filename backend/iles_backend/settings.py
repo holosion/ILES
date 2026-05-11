@@ -1,14 +1,23 @@
-"""Settings for the simple ILES Django backend."""  # This file controls the whole backend configuration.
+"""Settings for the ILES Django backend."""
 
-from pathlib import Path  # pathlib helps build file paths that work on Windows, macOS, and Linux.
+import os
+from pathlib import Path
+
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent  # BASE_DIR points to the backend folder.
 
-SECRET_KEY = "beginner-learning-key-change-this-before-real-deployment"  # Django needs a secret key for security features.
+SECRET_KEY = os.environ.get("SECRET_KEY", "beginner-learning-key-change-this-before-real-deployment")
 
-DEBUG = True  # True shows helpful errors during development; set False in production.
+DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]  # These hosts may access the Django server.
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if render_hostname:
+    ALLOWED_HOSTS.append(render_hostname)
+extra_allowed_hosts = os.environ.get("ALLOWED_HOSTS", "")
+if extra_allowed_hosts:
+    ALLOWED_HOSTS.extend([host.strip() for host in extra_allowed_hosts.split(",") if host.strip()])
 
 INSTALLED_APPS = [  # Installed apps tell Django which features are active.
     "django.contrib.admin",  # Enables the built-in admin dashboard.
@@ -25,6 +34,7 @@ INSTALLED_APPS = [  # Installed apps tell Django which features are active.
 MIDDLEWARE = [  # Middleware runs on every request and response.
     "corsheaders.middleware.CorsMiddleware",  # Adds CORS headers before other middleware handles the response.
     "django.middleware.security.SecurityMiddleware",  # Adds basic security protections.
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Serves static files correctly on Render.
     "django.contrib.sessions.middleware.SessionMiddleware",  # Reads and writes session data.
     "django.middleware.common.CommonMiddleware",  # Handles common web behavior such as URL normalization.
     "django.middleware.csrf.CsrfViewMiddleware",  # Protects normal Django forms from CSRF attacks.
@@ -59,6 +69,12 @@ DATABASES = {  # Database settings tell Django where to store data.
     }
 }
 
+if os.environ.get("DATABASE_URL"):
+    DATABASES["default"] = dj_database_url.config(
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+
 AUTH_PASSWORD_VALIDATORS = [  # These validators are used if you create admin users.
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},  # Blocks passwords too similar to user info.
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},  # Requires a minimum password length.
@@ -76,12 +92,43 @@ USE_TZ = True  # Stores datetimes in a timezone-aware format.
 
 STATIC_URL = "static/"  # URL prefix for static files.
 
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"  # Default primary key type for new models.
 
 CORS_ALLOWED_ORIGINS = [  # Frontend origins allowed to call the API from the browser.
     "http://localhost:5173",  # Vite's common development URL.
     "http://127.0.0.1:5173",  # Same Vite server accessed through 127.0.0.1.
 ]
+
+extra_cors_origins = os.environ.get("CORS_ALLOWED_ORIGINS", "")
+if extra_cors_origins:
+    CORS_ALLOWED_ORIGINS.extend(
+        [origin.strip() for origin in extra_cors_origins.split(",") if origin.strip()]
+    )
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+]
+extra_cors_regexes = os.environ.get("CORS_ALLOWED_ORIGIN_REGEXES", "")
+if extra_cors_regexes:
+    CORS_ALLOWED_ORIGIN_REGEXES.extend(
+        [origin.strip() for origin in extra_cors_regexes.split(",") if origin.strip()]
+    )
+
+CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS.copy()
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 REST_FRAMEWORK = {  # Simple DRF settings for this teaching project.
     "DEFAULT_RENDERER_CLASSES": [  # Renderers decide how API responses are displayed.

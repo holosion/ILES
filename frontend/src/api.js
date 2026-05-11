@@ -2,7 +2,7 @@ import axios from "axios"; // Axios is the small library React uses here to call
 
 const api = axios.create({
   // baseURL is the shared beginning of every backend endpoint.
-  baseURL: "http://127.0.0.1:8000/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api",
 });
 
 export const registerAccount = (account) => api.post("/auth/register/", account);
