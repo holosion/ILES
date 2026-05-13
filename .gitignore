@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+backend/db.sqlite3
+frontend/dist/
+frontend/node_modules/
+backend/staticfiles/
+.vercel/
+.env
+.env.local
+documentation/
+exam2025_extracted.txt
+tools/
